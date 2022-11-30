@@ -104,15 +104,26 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const user = req.body.username;
-  res.cookie('user', user);
-  res.redirect("/login");
+  let email = req.body.email;
+  let user = doesUserExist(email, users);
+  if (!user) {
+    res.status(403);
+    res.send('403 Forbidden');
+  }
+  if (user) {
+    if (req.body.password === user.password) {
+      res.cookie('user_id', user.id)
+      res.redirect("/urls");
+    } else {
+      res.status(403);
+      res.send('403 Forbidden');
+    }
+  }
 });
 
 app.post("/logout", (req, res) => {
-  const user = req.body.username;
-  res.clearCookie('user', user);
-  res.redirect("/urls");
+  res.clearCookie('user_id');
+  res.redirect("/login");
 });
 
 app.post("/register", (req, res) => {
