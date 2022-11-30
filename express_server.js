@@ -12,7 +12,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {};
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
 
 const generateRandomString = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -22,6 +33,15 @@ const generateRandomString = () => {
   }
   return result;
 }
+
+const doesUserExist = (email, users) => {
+  for (const user in users) {
+    if (users[user].email === email) {
+      return users[user];
+    }
+    return null;
+  }
+};
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -67,7 +87,7 @@ app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id]
   if (!longURL) {
     res.status(404);
-    res.send('404 Page Not Found')
+    res.send('404 Page Not Found');
   }
   res.redirect(longURL);
 });
@@ -92,10 +112,20 @@ app.post("/logout", (req, res) => {
 
 app.post("/register", (req, res) => {
   let id = generateRandomString();
+  let email = req.body.email;
+  let password = req.body.password;
+  if (email === '' || password === '') {
+    res.status(400);
+    res.send('400 Bad Request');
+  }
+  if (doesUserExist(email, users)) {
+    res.status(400);
+    res.send('400 Bad Request');
+  } 
   users[id] = {
     id,
-    email: req.body.email,
-    password: req.body.password
+    email,
+    password
   }
   res.cookie('user_id', id);
   res.redirect("/urls");
