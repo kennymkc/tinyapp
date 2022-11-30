@@ -1,7 +1,7 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const app = express();
-const PORT = 8080; 
+const PORT = 8080;
 
 app.use(cookieParser());
 
@@ -32,7 +32,7 @@ const generateRandomString = () => {
     result += chars[Math.ceil(Math.random() * chars.length)];
   }
   return result;
-}
+};
 
 const doesUserExist = (email, users) => {
   for (const user in users) {
@@ -89,7 +89,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id]
+  const longURL = urlDatabase[req.params.id];
   if (!longURL) {
     res.status(404);
     res.send('404 Page Not Found');
@@ -100,7 +100,7 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   let id = generateRandomString();
   urlDatabase[id] = req.body.longURL;
-  res.redirect(`/urls/${id}`)
+  res.redirect(`/urls/${id}`);
 });
 
 app.post("/login", (req, res) => {
@@ -112,7 +112,7 @@ app.post("/login", (req, res) => {
   }
   if (user) {
     if (req.body.password === user.password) {
-      res.cookie('user_id', user.id)
+      res.cookie('user_id', user.id);
       res.redirect("/urls");
     } else {
       res.status(403);
@@ -137,19 +137,19 @@ app.post("/register", (req, res) => {
   if (doesUserExist(email, users)) {
     res.status(400);
     res.send('400 Bad Request');
-  } 
+  }
   users[id] = {
     id,
     email,
     password
-  }
+  };
   res.cookie('user_id', id);
   res.redirect("/urls");
-})
+});
 
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.editURL;
-  res.redirect(`/urls`)
+  res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
