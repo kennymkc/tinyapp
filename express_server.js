@@ -44,8 +44,8 @@ const urlForUser = (id, urlDatabase) => {
 
 app.get("/urls", (req, res) => {
   const userID = req.cookies["user_id"];
-  const userURLs = urlForUser(userID, urlDatabase)
-  if (!req.cookies["user_id"]) {
+  const userURLs = urlForUser(userID, urlDatabase);
+  if (!userID) {
     res.send('Please Login or Register')
   };
   const templateVars = {
@@ -81,16 +81,17 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const userID = req.cookies["user_id"];
+  const database = urlDatabase[req.params.id];
+  if (!userID) {
+    return res.send("Please Login to View")
+  }
+  if (userID !== database.userID) {
+    return res.send("Need Permission to View")
+  }
   const templateVars = {
     user: users[userID],
     id: req.params.id, longURL: urlDatabase[req.params.id].longURL
   };
-  if (!userID) {
-    return res.send("Please Login to View")
-  }
-  if (!urlForUser(userID, urlDatabase)) {
-    return res.send("Need Permission to View")
-  }
   res.render("urls_show", templateVars);
 });
 
