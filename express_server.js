@@ -12,38 +12,11 @@ app.use(cookieSession({
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {};
+const { generateRandomString, getUserByEmail, urlForUser } = require('./helper');
 
+const urlDatabase = {};
 const users = {};
 
-const generateRandomString = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-};
-
-const doesUserExist = (email, users) => {
-  for (const user in users) {
-    if (users[user].email === email) {
-      const result = users[user]
-      return result;
-    }
-    return null;
-  }
-};
-
-const urlForUser = (id, urlDatabase) => {
-  let userURL = {};
-  for (const key in urlDatabase) {
-    if (id === urlDatabase[key].userID) {
-      userURL[key] = urlDatabase[key];
-    }
-  }
-  return userURL;
-};
 
 app.get("/", (req, res) => {
   res.redirect("/login");
@@ -125,7 +98,7 @@ app.post("/urls", (req, res) => {
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  const user = doesUserExist(email, users);
+  const user = getUserByEmail(email, users);
   if (!user) {
     res.status(403);
     res.send('403 Forbidden Please Register');
@@ -142,7 +115,8 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  res.clearCookie('session');
+  res.clearCookie('session.sig')
   res.redirect("/login");
 });
 
@@ -154,7 +128,7 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.send('400 Bad Request Cannot Leave Fields Empty');
   }
-  if (doesUserExist(email, users)) {
+  if (getUserByEmail(email, users)) {
     res.status(400);
     res.send('400 Bad Request Re-Enter Email');
   }
