@@ -29,7 +29,7 @@ const generateRandomString = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
   for (let i = 0; i < 6; i++) {
-    result += chars[Math.ceil(Math.random() * chars.length)];
+    result += chars[Math.floor(Math.random() * chars.length)];
   }
   return result;
 };
@@ -101,7 +101,7 @@ app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   if (!longURL) {
     res.status(404);
-    res.send('404 Page Not Found');
+    return res.send('Invalid ID');
   }
   res.redirect(longURL);
 });
@@ -110,7 +110,7 @@ app.post("/urls", (req, res) => {
   if (req.cookies["user_id"]) {
     let id = generateRandomString();
     urlDatabase[id] = req.body.longURL;
-    res.redirect(`/urls/${id}`);
+    return res.redirect(`/urls/${id}`);
   }
   res.send('Please log in to continue.')
 });
@@ -161,7 +161,7 @@ app.post("/register", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.editURL;
-  res.redirect(`/urls`);
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
