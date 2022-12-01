@@ -3,27 +3,14 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080;
 
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+const urlDatabase = {};
 
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "123",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
+const users = {};
 
 const generateRandomString = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -37,68 +24,78 @@ const generateRandomString = () => {
 const doesUserExist = (email, users) => {
   for (const user in users) {
     if (users[user].email === email) {
-      return users[user];
+      const result = users[user]
+      return result;
     }
     return null;
   }
 };
 
-app.use(express.urlencoded({ extended: true }));
+const urlForUser = (id, urlDatabase) => {
+  let userURL = {};
+  for (const key in urlDatabase) {
+    if (id === urlDatabase[key].userID) {
+      userURL[key] = urlDatabase[key];
+    }
+  }
+  return userURL;
+};
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
 
 app.get("/urls", (req, res) => {
+  const userID = req.cookies["user_id"];
+  const userURLs = urlForUser(userID, urlDatabase)
+  if (!req.cookies["user_id"]) {
+    res.send('Please Login or Register')
+  };
   const templateVars = {
-    user: users[req.cookies["user_id"]],
-    urls: urlDatabase
+    user: users[userID],
+    urls: userURLs
   };
   res.render("urls_index", templateVars);
 });
 
 app.get("/register", (req, res) => {
-  if (req.cookies["user_id"]) {
-    res.redirect("/urls")
-  }
   const templateVars = { user: users[req.cookies["user_id"]] };
+  if (req.cookies["user_id"]) {
+    return res.redirect("/urls")
+  }
   res.render("urls_register", templateVars);
 });
 
 app.get("/login", (req, res) => {
-  if (req.cookies["user_id"]) {
-    res.redirect("/urls")
-  }
   const templateVars = { user: users[req.cookies["user_id"]] };
+  if (req.cookies["user_id"]) {
+    return res.redirect("/urls");
+  }
   res.render("urls_login", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies["user_id"]) {
-    return res.redirect("/login") //return to avoid header Error
-  }
   const templateVars = { user: users[req.cookies["user_id"]] };
+  if (!req.cookies["user_id"]) {
+    return res.redirect("/login")
+  }
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
+  const userID = req.cookies["user_id"];
   const templateVars = {
-    user: users[req.cookies["user_id"]],
-    id: req.params.id, longURL: urlDatabase[req.params.id]
+    user: users[userID],
+    id: req.params.id, longURL: urlDatabase[req.params.id].longURL
   };
+  if (!userID) {
+    return res.send("Please Login to View")
+  }
+  if (!urlForUser(userID, urlDatabase)) {
+    return res.send("Need Permission to View")
+  }
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   if (!longURL) {
     res.status(404);
     return res.send('Invalid ID');
@@ -109,22 +106,25 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   if (req.cookies["user_id"]) {
     let id = generateRandomString();
-    urlDatabase[id] = req.body.longURL;
+    urlDatabase[id] = {
+      longURL: req.body.longURL,
+      userID: req.cookies["user_id"]
+    };
     return res.redirect(`/urls/${id}`);
   }
   res.send('Please log in to continue.')
 });
 
 app.post("/login", (req, res) => {
-  let email = req.body.email;
-  let user = doesUserExist(email, users);
+  const email = req.body.email;
+  const user = doesUserExist(email, users);
   if (!user) {
     res.status(403);
-    res.send('403 Forbidden');
+    res.send('403 Forbidden Please Register');
   }
   if (user) {
     if (req.body.password === user.password) {
-      res.cookie('user_id', user.id);
+      res.cookie('user_id', user.id); // gives me aJ48lW
       res.redirect("/urls");
     } else {
       res.status(403);
