@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
@@ -41,6 +42,9 @@ const urlForUser = (id, urlDatabase) => {
   return userURL;
 };
 
+app.get("/", (req, res) => {
+  res.redirect("/login");
+});
 
 app.get("/urls", (req, res) => {
   const userID = req.cookies["user_id"];
@@ -124,8 +128,8 @@ app.post("/login", (req, res) => {
     res.send('403 Forbidden Please Register');
   }
   if (user) {
-    if (req.body.password === user.password) {
-      res.cookie('user_id', user.id); // gives me aJ48lW
+    if (bcrypt.compareSync(req.body.password, user.password)) {
+      res.cookie('user_id', user.id);
       res.redirect("/urls");
     } else {
       res.status(403);
@@ -142,7 +146,7 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
   let id = generateRandomString();
   let email = req.body.email;
-  let password = req.body.password;
+  let password = bcrypt.hashSync(req.body.password, 10);
   if (email === '' || password === '') {
     res.status(400);
     res.send('400 Bad Request');
