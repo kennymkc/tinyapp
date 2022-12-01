@@ -161,13 +161,25 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.editURL;
-  res.redirect("/urls");
+  const userID = req.cookies["user_id"];
+  const database = urlDatabase[req.params.id];
+  if (userID && userID === database.userID) {
+    urlDatabase[req.params.id] = req.body.editURL;
+    res.redirect("/urls");
+  } else {
+    res.send('Permission Not Granted');
+  }
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
+  const userID = req.cookies["user_id"];
+  const database = urlDatabase[req.params.id];
+  if (userID && userID === database.userID) {
+    delete urlDatabase[req.params.id];
+    res.redirect("/urls");
+  } else {
+    res.send('Permission Needed to Delete');
+  }
 });
 
 
