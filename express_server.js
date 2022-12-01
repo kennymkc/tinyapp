@@ -16,7 +16,7 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "123",
   },
   user2RandomID: {
     id: "user2RandomID",
@@ -66,16 +66,25 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+  if (req.cookies["user_id"]) {
+    res.redirect("/urls")
+  }
   const templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_register", templateVars);
 });
 
 app.get("/login", (req, res) => {
+  if (req.cookies["user_id"]) {
+    res.redirect("/urls")
+  }
   const templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_login", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    return res.redirect("/login") //return to avoid header Error
+  }
   const templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
@@ -98,9 +107,12 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  let id = generateRandomString();
-  urlDatabase[id] = req.body.longURL;
-  res.redirect(`/urls/${id}`);
+  if (req.cookies["user_id"]) {
+    let id = generateRandomString();
+    urlDatabase[id] = req.body.longURL;
+    res.redirect(`/urls/${id}`);
+  }
+  res.send('Please log in to continue.')
 });
 
 app.post("/login", (req, res) => {
