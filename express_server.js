@@ -12,7 +12,7 @@ app.use(cookieSession({
 
 app.set("view engine", "ejs");
 
-const { generateRandomString, getUserByEmail, urlForUser } = require('./helper');
+const { generateRandomString, getUserByEmail, urlForUser } = require('./helpers');
 
 const urlDatabase = {};
 const users = {};
