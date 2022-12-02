@@ -1,3 +1,11 @@
+/* ToC:
+Setup
+Functions
+Variables
+.GET
+.POST
+*/
+
 const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
