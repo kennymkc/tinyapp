@@ -45,7 +45,7 @@ describe('generateRandomString', function () {
   it('should return a random 6 character string', function () {
     const id = generateRandomString();
     const length = 6;
-    assert.equal(id.length, 6)
+    assert.equal(id.length, 6);
   });
 });
 

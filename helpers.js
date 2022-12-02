@@ -10,7 +10,7 @@ const generateRandomString = () => {
 const getUserByEmail = (email, database) => {
   for (const user in database) {
     if (database[user].email === email) {
-      const result = database[user]
+      const result = database[user];
       return result;
     }
     return null;

@@ -26,8 +26,8 @@ app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
   const userURLs = urlForUser(userID, urlDatabase);
   if (!userID) {
-    res.send('Please Login or Register')
-  };
+    res.send('Please Login or Register');
+  }
   const templateVars = {
     user: users[userID],
     urls: userURLs
@@ -38,7 +38,7 @@ app.get("/urls", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = { user: users[req.session.user_id] };
   if (req.session.user_id) {
-    return res.redirect("/urls")
+    return res.redirect("/urls");
   }
   res.render("urls_register", templateVars);
 });
@@ -54,7 +54,7 @@ app.get("/login", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: users[req.session.user_id] };
   if (!req.session.user_id) {
-    return res.redirect("/login")
+    return res.redirect("/login");
   }
   res.render("urls_new", templateVars);
 });
@@ -63,10 +63,10 @@ app.get("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
   const database = urlDatabase[req.params.id];
   if (!userID) {
-    return res.send("Please Login to View")
+    return res.send("Please Login to View");
   }
   if (userID !== database.userID) {
-    return res.send("Need Permission to View")
+    return res.send("Need Permission to View");
   }
   const templateVars = {
     user: users[userID],
@@ -93,7 +93,7 @@ app.post("/urls", (req, res) => {
     };
     return res.redirect(`/urls/${id}`);
   }
-  res.send('Please log in to continue.')
+  res.send('Please log in to continue.');
 });
 
 app.post("/login", (req, res) => {
@@ -116,7 +116,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie('session');
-  res.clearCookie('session.sig')
+  res.clearCookie('session.sig');
   res.redirect("/login");
 });
 
