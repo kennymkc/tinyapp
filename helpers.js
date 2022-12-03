@@ -7,6 +7,7 @@ const generateRandomString = () => {
   return result;
 };
 
+//Checks if email exists against database 
 const getUserByEmail = (email, database) => {
   for (const user in database) {
     if (database[user].email === email) {
@@ -17,6 +18,7 @@ const getUserByEmail = (email, database) => {
   }
 };
 
+//Only logged in users can see their created URLs
 const urlForUser = (id, urlDatabase) => {
   let userURL = {};
   for (const key in urlDatabase) {

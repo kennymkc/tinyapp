@@ -33,6 +33,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
   const userURLs = urlForUser(userID, urlDatabase);
+  //checks if user is logged in before showing their specific URLs created
   if (!userID) {
     res.send('Please Login or Register');
   } else {
@@ -80,6 +81,7 @@ app.get("/urls/:id", (req, res) => {
   if (!userID) {
     return res.send("Please Login to View");
   }
+  //only shows URLs user created when that user is logged in
   if (userID !== database.userID) {
     res.send("Need Permission to View");
   } else {
@@ -146,6 +148,7 @@ app.post("/register", (req, res) => {
     res.status(400);
     return res.send('400 Bad Request Cannot Leave Fields Empty');
   }
+  //checks if user already exists in database (intentional cryptic response)
   if (getUserByEmail(email, users)) {
     res.status(400);
     res.send('400 Bad Request Re-Enter Email');
@@ -163,6 +166,7 @@ app.post("/register", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
   const database = urlDatabase[req.params.id];
+  //ensures only logged in users see their own URLs
   if (userID && userID === database.userID) {
     urlDatabase[req.params.id].longURL = req.body.editURL;
     res.redirect("/urls");
@@ -174,6 +178,7 @@ app.post("/urls/:id", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const userID = req.session.user_id;
   const database = urlDatabase[req.params.id];
+  //ensures only logged in users delete their own URLs
   if (userID && userID === database.userID) {
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
